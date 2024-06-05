@@ -12,24 +12,29 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
 ### 1. Configuration du projet Django
 
 1. **Créer un environnement virtuel**:
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # Sur Windows: venv\Scripts\activate
    ```
 
 2. **Installer Django**:
+
    ```bash
    pip install django
    ```
 
 3. **Créer un projet Django**:
+
    ```bash
    django-admin startproject myproject
    cd myproject
    ```
 
 4. **Configurer la base de données Oracle**:
+
    - Installer cx_Oracle:
+
      ```bash
      pip install cx_Oracle
      ```
@@ -51,6 +56,7 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
 ### 2. Configuration du projet React
 
 1. **Créer une application React**:
+
    - Depuis la racine de votre projet Django :
      ```bash
      npx create-react-app frontend
@@ -58,7 +64,9 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
      ```
 
 2. **Construire l'application React**:
+
    - Modifiez le fichier `package.json` pour inclure un script de construction:
+
      ```json
      "scripts": {
          "build": "react-scripts build"
@@ -73,9 +81,11 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
 ### 3. Intégration de React dans Django
 
 1. **Servir les fichiers React avec Django**:
+
    - Créez un dossier `static` dans le répertoire principal de votre projet Django et copiez le contenu du dossier `build` de votre application React dedans.
 
 2. **Configurer Django pour servir les fichiers statiques**:
+
    - Ajoutez ou modifiez les paramètres suivants dans `settings.py`:
      ```python
      STATIC_URL = '/static/'
@@ -83,7 +93,9 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
      ```
 
 3. **Créer une vue pour rendre le fichier index.html de React**:
+
    - Dans votre application Django, créez une vue simple dans `views.py`:
+
      ```python
      from django.shortcuts import render
 
@@ -92,7 +104,9 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
      ```
 
 4. **Configurer les URLs**:
+
    - Modifiez `urls.py` pour inclure la nouvelle vue:
+
      ```python
      from django.urls import path
      from .views import index
@@ -117,6 +131,7 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
 ### 4. Exécution du projet
 
 1. **Démarrer le serveur Django**:
+
    ```bash
    python manage.py runserver
    ```
@@ -130,18 +145,21 @@ Configurer un projet avec Django, React.js et Oracle nécessite plusieurs étape
 
 Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser selon les besoins de votre projet.
 
---------------------------------------------------------------------------------------------------------------------------
+---
 
 ### 1. Ajouter Tailwind CSS à votre projet React
 
 1. **Installer les dépendances nécessaires**:
+
    - Depuis le répertoire `frontend` de votre application React, installez Tailwind CSS, PostCSS et Autoprefixer:
      ```bash
      npm install -D tailwindcss postcss autoprefixer
      ```
 
 2. **Créer les fichiers de configuration**:
+
    - Toujours dans le répertoire `frontend`, générez les fichiers de configuration pour Tailwind CSS et PostCSS:
+
      ```bash
      npx tailwindcss init -p
      ```
@@ -149,21 +167,21 @@ Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser 
    - Cela créera deux fichiers: `tailwind.config.js` et `postcss.config.js`.
 
 3. **Configurer Tailwind CSS**:
+
    - Ouvrez `tailwind.config.js` et configurez les chemins vers tous vos fichiers qui utiliseront Tailwind CSS:
      ```javascript
      /** @type {import('tailwindcss').Config} */
      module.exports = {
-       content: [
-         "./src/**/*.{js,jsx,ts,tsx}",
-       ],
+       content: ["./src/**/*.{js,jsx,ts,tsx}"],
        theme: {
          extend: {},
        },
        plugins: [],
-     }
+     };
      ```
 
 4. **Ajouter Tailwind CSS aux fichiers CSS**:
+
    - Dans `src/index.css`, ajoutez les directives Tailwind CSS:
      ```css
      @tailwind base;
@@ -172,6 +190,7 @@ Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser 
      ```
 
 5. **Tester l'installation**:
+
    - Ajoutez quelques classes Tailwind à un composant React pour vérifier que Tailwind CSS fonctionne correctement. Par exemple, modifiez `src/App.js`:
      ```jsx
      function App() {
@@ -195,12 +214,14 @@ Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser 
 ### 2. Intégrer les fichiers générés dans Django
 
 1. **Copier les fichiers statiques**:
+
    - Copiez les fichiers générés dans le dossier `build` de votre application React vers le dossier `static` de votre projet Django:
      ```bash
      cp -r build/* ../static/
      ```
 
 2. **Configurer Django pour servir les fichiers statiques**:
+
    - Ajoutez ou modifiez les paramètres suivants dans `settings.py` de votre projet Django:
      ```python
      STATIC_URL = '/static/'
@@ -208,7 +229,9 @@ Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser 
      ```
 
 3. **Créer une vue pour rendre le fichier `index.html` de React**:
+
    - Dans votre application Django, créez une vue simple dans `views.py`:
+
      ```python
      from django.shortcuts import render
 
@@ -217,7 +240,9 @@ Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser 
      ```
 
 4. **Configurer les URLs**:
+
    - Modifiez `urls.py` pour inclure la nouvelle vue:
+
      ```python
      from django.urls import path
      from .views import index
@@ -242,6 +267,7 @@ Ce guide vous offre une configuration de base. Vous pouvez ajuster et optimiser 
 ### 3. Exécution du projet
 
 1. **Démarrer le serveur Django**:
+
    ```bash
    python manage.py runserver
    ```
@@ -256,6 +282,7 @@ Pour déployer votre application, vous devrez configurer un serveur web (comme N
 **Docker Configuration:**
 
 1. **Dockerfile pour l'application Django**:
+
    ```dockerfile
    FROM python:3.9-slim
 
@@ -272,8 +299,9 @@ Pour déployer votre application, vous devrez configurer un serveur web (comme N
    ```
 
 2. **docker-compose.yml**:
+
    ```yaml
-   version: '3.8'
+   version: "3.8"
 
    services:
      web:
@@ -313,6 +341,7 @@ Pour déployer votre application, vous devrez configurer un serveur web (comme N
    ```
 
 3. **Configuration Nginx (nginx.conf)**:
+
    ```nginx
    server {
        listen 80;
@@ -339,5 +368,3 @@ Pour déployer votre application, vous devrez configurer un serveur web (comme N
    ```bash
    docker-compose up --build
    ```
-
-

@@ -1,4 +1,11 @@
-# react-django-oracle
+Pour configurer un projet Django avec Django Rest Framework, React.js, Oracle, et Redaxios, vous pouvez suivre ces étapes détaillées. Ce guide couvrira la création de l'environnement de développement, l'installation des dépendances nécessaires, la création d'APIs avec Django Rest Framework, l'intégration avec une base de données Oracle en utilisant `django-oracle`, et l'utilisation de Redaxios dans votre application React.
+
+### Prérequis
+
+1. **Python et Django**: Assurez-vous d'avoir Python et Django installés.
+2. **Node.js et npm/yarn/pnpm**: Pour gérer React.js.
+3. **Oracle Database**: Assurez-vous d'avoir accès à une base de données Oracle et les bons drivers pour la connexion.
+4. **Outils de développement**: Visual Studio Code ou tout autre éditeur de code.
 
 ### 1. Configuration du projet Django
 
@@ -178,25 +185,25 @@ Ajoutez Tailwind dans `src/index.css`:
 @tailwind utilities;
 ```
 
-#### 2.3 Faire des requêtes API
+#### 2.3 Faire des requêtes API avec Redaxios
 
-Installez axios pour les requêtes HTTP:
+Installez Redaxios pour les requêtes HTTP:
 
 ```bash
-npm install axios
+npm install redaxios
 ```
 
 Créez un composant pour afficher les données de l'API:
 
 ```jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import redaxios from 'redaxios';
 
 const App = () => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/items/')
+    redaxios.get('http://localhost:8000/api/items/')
       .then(response => {
         setItems(response.data);
       })
@@ -359,18 +366,26 @@ Pour déployer votre application, vous pouvez utiliser Docker pour la conteneuri
      oracle-data:
    ```
 
-3. **Configuration Nginx (nginx.conf)**:
+3. **Configuration Nginx (nginx.conf)**
+
+:
 
    ```nginx
    server {
        listen 80;
 
-       location / {
-           proxy_pass http://web:8000;
+       location /static/ {
+           alias /app/static/;
        }
 
-       location /static/ {
-           alias /static/;
+       location / {
+           proxy_pass http://web:8000;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Host $server_name;
        }
    }
    ```
+
+En suivant ce guide, vous devriez être capable de configurer un projet Django avec Django Rest Framework, React.js, Oracle, et Redaxios pour les requêtes HTTP. Cette configuration de base peut être ajustée et optimisée selon les besoins de votre projet.

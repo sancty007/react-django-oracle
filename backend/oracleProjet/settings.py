@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
 
+from pathlib import Path
+import cx_Oracle
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,6 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+
+    'users',
+    'teams',
+    'tournaments',
+    'matches',
 ]
 
 MIDDLEWARE = [
@@ -73,12 +81,24 @@ WSGI_APPLICATION = 'oracleProjet.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Initialiser le client Oracle Instant
+
+# backend/myproject/settings.py
+
+import os
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.oracle',
+        'NAME': os.environ.get('ORACLE_DB', 'XE'),
+        'USER': os.environ.get('ORACLE_USER'),
+        'PASSWORD': os.environ.get('ORACLE_PASSWORD'),
+        'HOST': 'oracle_db',
+        'PORT': '1521',
     }
 }
+
+
 
 
 # Password validation
@@ -103,9 +123,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 

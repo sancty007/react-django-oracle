@@ -1,210 +1,148 @@
-Pour configurer votre projet Django pour servir les fichiers statiques générés par React en suivant la logique décrite dans votre `settings.py`, vous pouvez procéder de la manière suivante. Voici les étapes détaillées :
+Pour une structure de projet plus simple et organisée, vous pouvez organiser votre projet en suivant cette structure :
 
-1. **Structure du Projet :**
-   Assurez-vous que votre projet a la structure suivante :
-   ```
-   myproject/
-   ├── backend/
-   │   ├── myproject/
-   │   │   ├── __init__.py
-   │   │   ├── settings.py
-   │   │   ├── urls.py
-   │   │   ├── wsgi.py
-   │   │   └── asgi.py
-   │   ├── app/
-   │   │   ├── migrations/
-   │   │   ├── __init__.py
-   │   │   ├── admin.py
-   │   │   ├── apps.py
-   │   │   ├── models.py
-   │   │   ├── tests.py
-   │   │   └── views.py
-   │   ├── static/
-   │   ├── templates/
-   │   │   └── index.html
-   │   ├── manage.py
-   │   ├── requirements.txt
-   │   └── Dockerfile
-   ├── frontend/
-   │   ├── public/
-   │   ├── src/
-   │   ├── build/
-   │   ├── package.json
-   │   ├── postcss.config.js
-   │   └── Dockerfile
-   ├── .gitignore
-   ├── docker-compose.yml
-   └── nginx.conf
-   ```
+```
+myproject/
+├── backend/
+│   ├── manage.py
+│   ├── myproject/
+│   │   ├── __init__.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── wsgi.py
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── src/
+│   │   ├── main.jsx
+│   │   └── App.jsx
+│   └── public/
+│       └── index.html
+├── .env
+├── requirements.txt
+└── docker-compose.yml
+```
 
-2. **Modifier le fichier `settings.py` :**
-   Dans `backend/myproject/settings.py`, configurez les paramètres suivants pour servir les fichiers statiques générés par React :
+Voici comment vous pouvez configurer chaque partie :
 
-   ```python
-   import os
+### 1. Fichier `.env`
 
-   # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-   BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+```plaintext
+ORACLE_USER=your_username
+ORACLE_PASSWORD=your_password
+ORACLE_DB=XE
+```
 
-   # Quick-start development settings - unsuitable for production
-   # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+### 2. Fichier `docker-compose.yml`
 
-   # SECURITY WARNING: keep the secret key used in production secret!
-   SECRET_KEY = 'ib855caai4($%5b3j($-d^ltrj@av234wa0#op&ban_h9y-7$6'
+```yaml
+version: "3"
 
-   # SECURITY WARNING: don't run with debug turned on in production!
-   DEBUG = True
+services:
+  backend:
+    image: python:3.10-slim
+    container_name: django_app
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - oracle_db
 
-   ALLOWED_HOSTS = []
+  frontend:
+    image: node:16
+    container_name: react_app
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    command: sh -c "yarn install && yarn dev"
+    ports:
+      - "3000:3000"
 
-   # Application definition
+  oracle_db:
+    image: gvenzl/oracle-xe
+    container_name: oracle_db
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+      - ORACLE_USER=${ORACLE_USER}
+      - ORACLE_SID=${ORACLE_DB}
+```
 
-   INSTALLED_APPS = [
-       'django.contrib.admin',
-       'django.contrib.auth',
-       'django.contrib.contenttypes',
-       'django.contrib.sessions',
-       'django.contrib.messages',
-       'django.contrib.staticfiles',
-   ]
+### 3. Configuration de Django (`settings.py`)
 
-   MIDDLEWARE = [
-       'django.middleware.security.SecurityMiddleware',
-       'django.contrib.sessions.middleware.SessionMiddleware',
-       'django.middleware.common.CommonMiddleware',
-       'django.middleware.csrf.CsrfViewMiddleware',
-       'django.contrib.auth.middleware.AuthenticationMiddleware',
-       'django.contrib.messages.middleware.MessageMiddleware',
-       'django.middleware.clickjacking.XFrameOptionsMiddleware',
-   ]
+```python
+# backend/myproject/settings.py
 
-   ROOT_URLCONF = 'myproject.urls'
+import os
 
-   TEMPLATES = [
-       {
-           'BACKEND': 'django.template.backends.django.DjangoTemplates',
-           'DIRS': [
-               os.path.join(BASE_DIR, 'templates'),
-               os.path.join(BASE_DIR, '../frontend/build'),
-           ],
-           'APP_DIRS': True,
-           'OPTIONS': {
-               'context_processors': [
-                   'django.template.context_processors.debug',
-                   'django.template.context_processors.request',
-                   'django.contrib.auth.context_processors.auth',
-                   'django.contrib.messages.context_processors.messages',
-               ],
-           },
-       },
-   ]
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.oracle',
+        'NAME': os.environ.get('ORACLE_DB', 'XE'),
+        'USER': os.environ.get('ORACLE_USER'),
+        'PASSWORD': os.environ.get('ORACLE_PASSWORD'),
+        'HOST': 'oracle_db',
+        'PORT': '1521',
+    }
+}
+```
 
-   WSGI_APPLICATION = 'myproject.wsgi.application'
+### 4. Lancer les conteneurs Docker
 
-   # Database
-   # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+Avec tout configuré, lancez vos conteneurs Docker :
 
-   DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.sqlite3',
-           'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-       }
-   }
+```bash
+docker-compose up --build
+```
 
-   # Password validation
-   # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
+### 5. Vérifier la connexion de Django à Oracle
 
-   AUTH_PASSWORD_VALIDATORS = [
-       {
-           'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-       },
-       {
-           'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-       },
-       {
-           'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-       },
-       {
-           'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-       },
-   ]
+Pour vérifier que Django communique correctement avec Oracle, vous pouvez exécuter le shell Django et tester la connexion :
 
-   # Internationalization
-   # https://docs.djangoproject.com/en/3.0/topics/i18n/
+```bash
+docker exec -it django_app python manage.py shell
+```
 
-   LANGUAGE_CODE = 'en-us'
+Dans le shell Django :
 
-   TIME_ZONE = 'UTC'
+```python
+from django.db import connections
+from django.db.utils import OperationalError
 
-   USE_I18N = True
+db_conn = connections['default']
+try:
+    c = db_conn.cursor()
+    print("Database connection successful!")
+except OperationalError:
+    print("Database connection failed.")
+```
 
-   USE_L10N = True
+### 6. Accéder aux dossiers avec VS Code
 
-   USE_TZ = True
-
-   # Static files (CSS, JavaScript, Images)
-   # https://docs.djangoproject.com/en/3.0/howto/static-files/
-
-   STATIC_URL = '/static/'
-
-   STATICFILES_DIRS = [
-       os.path.join(BASE_DIR, '../frontend/build/static'),
-   ]
-
-   ```
-
-3. **Configurer les URLs :**
-   Dans `backend/myproject/urls.py`, configurez les routes pour servir le frontend React :
-
-   ```python
-   from django.contrib import admin
-   from django.urls import path, re_path
-   from django.views.generic import TemplateView
-
-   urlpatterns = [
-       path('admin/', admin.site.urls),
-       re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
-   ]
-   ```
-
-4. **Créer une vue pour servir l'application React :**
-   Vous n'avez pas besoin de créer une vue séparée, car vous utilisez `TemplateView` pour servir le fichier `index.html` par défaut.
-
-5. **Construire l'application React et copier les fichiers générés :**
-   Dans votre répertoire `frontend`, construisez votre application React et copiez les fichiers générés dans le dossier `static` de Django :
+1. **Ouvrir VS Code dans le répertoire de votre projet** :
 
    ```bash
-   cd frontend
-   npm run build
-   cp -r build/* ../backend/static/
+   code .
    ```
 
-   Vous pouvez automatiser cette étape en ajoutant un script dans le `package.json` comme mentionné précédemment :
+2. **Installer l'extension Docker pour VS Code** (si ce n'est pas déjà fait) :
 
-   ```json
-   "scripts": {
-     "build": "react-scripts build",
-     "copy-build": "cp -r build/* ../backend/static/",
-     "build-and-copy": "npm run build && npm run copy-build"
-   }
-   ```
+   - Allez dans le menu des extensions (Ctrl+Shift+X).
+   - Recherchez "Docker" et installez l'extension officielle Docker.
 
-   Puis exécuter :
+3. **Accéder aux conteneurs via l'extension Docker** :
 
-   ```bash
-   npm run build-and-copy
-   ```
+   - Ouvrez le panneau Docker dans VS Code (Ctrl+Shift+P et tapez "Docker: Show Containers").
+   - Vous pourrez voir vos conteneurs en cours d'exécution et interagir avec eux directement depuis VS Code.
 
-6. **Vérifiez la configuration :**
-   Lancez le serveur Django pour vérifier que tout fonctionne correctement :
-
-   ```bash
-   cd backend
-   python manage.py runserver
-   ```
-
-   Accédez à `http://localhost:8000` pour voir votre application React servie par Django.
-
-### Conclusion
-
-Cette configuration permet à Django de servir les fichiers statiques générés par React de manière automatisée et cohérente. Vous pouvez également intégrer un pipeline CI/CD pour automatiser complètement ce processus à chaque fois que vous apportez des modifications au code de votre application.
+En suivant ces étapes, vous aurez une structure de projet organisée et pourrez configurer votre environnement de développement avec Docker, connecter Django à une base de données Oracle et ajouter une application React avec Vite en utilisant les informations d'identification définies dans le fichier `.env`.
